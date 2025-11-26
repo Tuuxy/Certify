@@ -1,0 +1,38 @@
+name: Build Certify
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Restore NuGet packages
+        run: |
+          nuget restore Certify.sln
+
+      - name: Build solution (Release x64)
+        run: |
+          msbuild Certify.sln /p:Configuration=Release /p:Platform="Any CPU"
+
+      - name: Upload Certify.exe artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Certify-Release
+          path: |
+            **/bin/Release/Certify.exe
+
